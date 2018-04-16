@@ -4,7 +4,13 @@ import {Schedule, ColumnHeader} from "./Schedule";
 import styled from 'styled-components'
 import moment from 'moment'
 
-const data = []
+const data = [
+    [moment({hour: 12}), moment({hour: 13})],
+    [moment({hour: 14}), moment({hour: 14, minutes: 30})],
+    [moment({hour: 7}).day(2), moment({hour: 10, minutes: 30}).day(2)],
+    [moment({hour: 21}).day(3), moment({hour: 23, minutes: 30}).day(3)],
+    [moment({ hour: 21}).day(0), moment({hour: 23, minutes: 30}).day(0)],
+]
 const pData = [
     {name: 'yossi'},
     {name: 'shlomi'}
@@ -60,9 +66,10 @@ const App = () => <Wrapper className="app-wrapper">
     </Header>
     <Content className="content">
         <Schedule
-            data={pData}
-            mode="week"
-            value={moment()}
+            data={data}
+            mode="day"
+            value={moment().day(3)}
+            days={3}
             // headRender={ProviderHeadRender}
         />
     </Content>

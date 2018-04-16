@@ -1,22 +1,21 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import styled from 'styled-components'
-
 
 const weekDays = moment.weekdaysMin()
 
 const TimeSlot = (props) => {
 
+    const {size} = props
+
     const TimeSlotWrapper = styled.div`
+        box-sizing:border-box;
         border-top: solid 1px #e0e0e0; 
-        height: 1.5em;
-        line-height: 25px;
+        height: ${size}px;
         `
 
     const {children} = props
-    // console.log(children)
 
     return <TimeSlotWrapper>{children && children.format('HH:mm')}</TimeSlotWrapper>
 }
@@ -48,23 +47,7 @@ const Inner = styled.div`
     right: 0;
     bottom: 0;
 `
-const Inner2 = styled.div`
 
-       font-size: 13px;
-    color: #000;
-    background: #fff;
-    display: block;
-    height: 100%;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-`
-
-const Inner3 = styled.div`
-
-       position: relative;
-    height: 100%;
-`
 const Content = styled.div`
     overflow: auto;
     position: absolute;
@@ -76,8 +59,6 @@ const Content = styled.div`
 `
 
 const ColumnHeader = styled.div`
-  //display: flex;
-  //overflow-y: scroll;
   padding: .714em .4em;
   line-height: 20px;
   max-height: 54px;
@@ -86,20 +67,11 @@ const ColumnHeader = styled.div`
 
 `
 const ColumnContent = styled.div`
-  //height: 1.5em;
-  //overflow-y: scroll;
 `
 
 
 const Layout = styled.div`
   display: flex;
-  //height: 100%;
-  //position: absolute;
-  //left: 0;
-  //top:0;
-  //right: 0;
-  //bottom: 0;
-  //overflow-y: scroll;
 `
 
 const Virtual = styled.div`
@@ -116,18 +88,26 @@ const Virtual = styled.div`
 
 const Tile = props => {
 
+    const {start, end, interval, size, reduction} = props
 
-    const start = (props.start.diff(moment().startOf('day'), 'minutes') / 5 - 1) * 25
-    const end = (props.end.diff(props.start, 'minutes') / 5 + 1) * 25
+    const startOfDay = start.clone().startOf('day')
+
+    const diff = (d1, d2) => d2.diff(d1, 'minutes') / interval
+
+    const startDiff = diff(startOfDay, start)
+    const endDiff = diff(start, end)
+
+    const posY = ((startDiff - reduction) * size)
+    const height = (endDiff * size)
 
     const TileStyle = styled.div`
-    left: 0;
-    top:${start}px;
-    right:0;
-    height: ${end}px;
-    position: absolute;
-    background: red;
-`
+        left: 0;
+        right:0;
+        top:${posY}px;
+        height: ${height}px;
+        position: absolute;
+        background: red;
+     `
 
     return <TileStyle/>
 
@@ -142,6 +122,8 @@ const DayHeaderRender = props => {
 
 const DefaultHeaderRender = props => <ColumnHeader>{props.data}</ColumnHeader>
 
+const calcSize = interval => interval / 60 * 100
+
 class Schedule extends React.Component {
 
 
@@ -151,27 +133,34 @@ class Schedule extends React.Component {
 
     render() {
 
-        const {data, value, headRender, mode} = this.props
+        const {data, value, headRender, mode, days: daysCount} = this.props
 
-        const days = mode === 'day' ? data.map(() => value) : weekDays
+        const days = daysCount ?
+            [...new Array(daysCount)].map(() => value) :
+            [...new Array(7)].map((item, i) => value.clone().day(i))
 
-        const start = value.startOf('day')
-        const interval = 5
-        const slots = [...new Array(24 * 60 / interval)]
-        const rows = slots.map(item => <TimeSlot/>)
-        const Head = headRender ? headRender : (mode === 'day' ? DayHeaderRender : DefaultHeaderRender)
+        const Head = headRender || DayHeaderRender
+
+        const start = value.clone().startOf('day')
+
+        const timeSlotInterval = 15
+        const timeDisplayInterval = 60
+        const slotSize = calcSize(timeSlotInterval)
+
+        const timeSlots = [...new Array(24 * 60 / timeSlotInterval)]
+        const timeDisplay = [...new Array(24 * 60 / timeDisplayInterval)]
 
         const timeCol =
             <TimeColumn>
-                {slots.map(item =>
-                    <TimeSlot>
-                        {start.add(interval, 'minutes').clone()}
+                {timeDisplay.map(item =>
+                    <TimeSlot size={calcSize(timeDisplayInterval)}>
+                        {start.add(timeDisplayInterval, 'minutes').clone()}
                     </TimeSlot>)}
             </TimeColumn>
 
         let rowStyle =
             <Column>
-                {rows}
+                {timeSlots.map(item => <TimeSlot size={slotSize}/>)}
             </Column>
 
         let cols = []
@@ -179,8 +168,17 @@ class Schedule extends React.Component {
 
         for (let i = 0; i < days.length; i++) {
 
+            const day = days[i].day()
+            //todo: imporve performence using group by index
+            const todayEvents = data.filter(value => value[0].day() === day)
+
             cols.push(<Column>
-                <Tile start={moment({hour: 15})} end={moment({hour: 16, minutes: 30})}>tets</Tile>
+                {todayEvents.map(event => <Tile
+                    start={event[0]}
+                    end={event[1]}
+                    interval={timeSlotInterval}
+                    reduction={timeDisplayInterval / timeSlotInterval}
+                    size={slotSize}>tets</Tile>)}
             </Column>)
 
             colHeads.push(<Head index={i} data={days[i]}/>)
@@ -188,21 +186,17 @@ class Schedule extends React.Component {
 
         return <Wrapper>
             <Inner>
-                {/*<Inner2>*/}
-                    {/*<Inner3>*/}
-                        <Layout style={{marginLeft: 42}}>
-                            {colHeads}
-                        </Layout>
-                        <Content>
-                            <Layout>
-                                {timeCol} {cols}
-                            </Layout>
-                            <Virtual>
-                                {rowStyle}
-                            </Virtual>
-                        </Content>
-                    {/*</Inner3>*/}
-                {/*</Inner2>*/}
+                <Layout style={{marginLeft: 42}}>
+                    {colHeads}
+                </Layout>
+                <Content>
+                    <Layout>
+                        {timeCol} {cols}
+                    </Layout>
+                    <Virtual>
+                        {rowStyle}
+                    </Virtual>
+                </Content>
             </Inner>
 
         </Wrapper>
