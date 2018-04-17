@@ -5,8 +5,9 @@ import styled from 'styled-components'
 import moment from 'moment'
 
 const data = [
+    [moment({hour: 11}), moment({hour: 13, minute:30})],
     [moment({hour: 12}), moment({hour: 13})],
-    [moment({hour: 14}), moment({hour: 14, minutes: 30})],
+    [moment({hour: 13, minute:45}), moment({hour: 14, minute:30})],
     [moment({hour: 7}).day(2), moment({hour: 10, minutes: 30}).day(2)],
     [moment({hour: 21}).day(3), moment({hour: 23, minutes: 30}).day(3)],
     [moment({ hour: 21}).day(0), moment({hour: 23, minutes: 30}).day(0)],
@@ -59,7 +60,6 @@ const ProviderHeadRender = props => {
     return <ColumnHeader>{pData[index] && pData[index].name}</ColumnHeader>
 }
 
-
 const App = () => <Wrapper className="app-wrapper">
     <Header>
         <Title>Welcome to React</Title>
@@ -69,7 +69,7 @@ const App = () => <Wrapper className="app-wrapper">
             data={data}
             mode="day"
             value={moment().day(3)}
-            days={3}
+            // days={3}
             // headRender={ProviderHeadRender}
         />
     </Content>

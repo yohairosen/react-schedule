@@ -1,94 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import moment from 'moment'
-import styled from 'styled-components'
 
-const weekDays = moment.weekdaysMin()
+import {
+    TimeColumn,
+    Column,
+    Wrapper,
+    Inner,
+    Content,
+    ColumnHeader,
+    Layout,
+    Virtual,
+    TileStyle,
+    TimeSlot
+} from './style'
 
-const TimeSlot = (props) => {
-
-    const {size} = props
-
-    const TimeSlotWrapper = styled.div`
-        box-sizing:border-box;
-        border-top: solid 1px #e0e0e0; 
-        height: ${size}px;
-        `
-
-    const {children} = props
-
-    return <TimeSlotWrapper>{children && children.format('HH:mm')}</TimeSlotWrapper>
-}
-
-const TimeColumn = styled.div`
-  border-left: solid 1px #e0e0e0;
-`
-
-const Column = styled.div`
-  border-left: solid 1px #e0e0e0;
-  flex: 1 1 auto;
-  position: relative;
-`
-
-const Wrapper = styled.div`
-        position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-`
-
-const Inner = styled.div`
-
-    position: absolute;
-    top: 61px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-`
-
-const Content = styled.div`
-    overflow: auto;
-    position: absolute;
-    top:42px;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-`
-
-const ColumnHeader = styled.div`
-  padding: .714em .4em;
-  line-height: 20px;
-  max-height: 54px;
-  flex: 1 1 auto;
-
-
-`
-const ColumnContent = styled.div`
-`
-
-
-const Layout = styled.div`
-  display: flex;
-`
-
-const Virtual = styled.div`
-      //display: flex;
-      //background: black;
-      //overflow-y: scroll;
-  position: absolute; 
-  height: 100%;
-  left: 0;
-  top:0;
-  right:0;
-  //bottom: 0;
-`
 
 const Tile = props => {
 
-    const {start, end, interval, size, reduction} = props
+    const {start, end, interval, size, reduction, bg, width, position} = props
 
     const startOfDay = start.clone().startOf('day')
 
@@ -100,16 +30,8 @@ const Tile = props => {
     const posY = ((startDiff - reduction) * size)
     const height = (endDiff * size)
 
-    const TileStyle = styled.div`
-        left: 0;
-        right:0;
-        top:${posY}px;
-        height: ${height}px;
-        position: absolute;
-        background: red;
-     `
-
-    return <TileStyle/>
+    console.log(width * position)
+    return <TileStyle posY={posY} height={height} width={width} bg={bg} posX={width * position}/>
 
 }
 
@@ -119,21 +41,42 @@ const DayHeaderRender = props => {
     return <ColumnHeader>{data && data.format('dd')}</ColumnHeader>
 }
 
-
-const DefaultHeaderRender = props => <ColumnHeader>{props.data}</ColumnHeader>
-
 const calcSize = interval => interval / 60 * 100
+
+const calcOverlaps = () => {
+
+    const counts = {'default': 0}
+
+    return (event, eventList) => {
+        const overlapCount = eventList.reduce((count, e, i) => {
+            if (e[0].isBetween(event[0], event[1], null, '[)') ||
+                e[1].isBetween(event[0], event[1], null, '[)') ||
+                event[0].isBetween(e[0], e[1], null, '[)') ||
+                event[1].isBetween(e[0], e[1], null, '[)')) {
+
+                count.push(i)
+            }
+
+            return count
+
+        }, [])
+
+        let key = 'default'
+        if (overlapCount.length > 0) {
+            overlapCount.sort()
+            key = overlapCount.toString()
+            counts[key] = counts[key] === undefined ? 0 : counts[key] + 1
+        }
+
+        return {count: overlapCount.length, current: counts[key]}
+    }
+}
 
 class Schedule extends React.Component {
 
-
-    constructor() {
-        super()
-    }
-
     render() {
 
-        const {data, value, headRender, mode, days: daysCount} = this.props
+        const {data, value, headRender, days: daysCount} = this.props
 
         const days = daysCount ?
             [...new Array(daysCount)].map(() => value) :
@@ -166,19 +109,32 @@ class Schedule extends React.Component {
         let cols = []
         let colHeads = []
 
+        const overlapCount = calcOverlaps()
+
         for (let i = 0; i < days.length; i++) {
 
-            const day = days[i].day()
+            const day = days[i]
             //todo: imporve performence using group by index
-            const todayEvents = data.filter(value => value[0].day() === day)
+            const todayEvents = data.filter(value => value[0].isSame(day, 'day'))
+
 
             cols.push(<Column>
-                {todayEvents.map(event => <Tile
-                    start={event[0]}
-                    end={event[1]}
-                    interval={timeSlotInterval}
-                    reduction={timeDisplayInterval / timeSlotInterval}
-                    size={slotSize}>tets</Tile>)}
+                {todayEvents.map(event => {
+
+                    const {count, current} = overlapCount(event, todayEvents)
+
+                    return <Tile
+                        width={100 / count}
+                        position={current}
+                        bg={'blue'}
+                        start={event[0]}
+                        end={event[1]}
+                        interval={timeSlotInterval}
+                        reduction={timeDisplayInterval / timeSlotInterval}
+                        size={slotSize}>tets</Tile>
+
+
+                })}
             </Column>)
 
             colHeads.push(<Head index={i} data={days[i]}/>)
@@ -202,7 +158,6 @@ class Schedule extends React.Component {
         </Wrapper>
 
     }
-
 
 }
 
