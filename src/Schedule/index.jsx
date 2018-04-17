@@ -12,26 +12,42 @@ import {
     Layout,
     Virtual,
     TileStyle,
-    TimeSlot
+    TimeSlot,
+    LineStyle
 } from './style'
 
 
+const calcPosition = (to, step, from) => {
+
+    to = to.clone()
+
+    if (!from) {
+        from = to.clone().subtract(1, 'hour')
+        to = to.startOf('day')
+    }
+
+    return from.diff(to, 'minutes') * step
+}
+
+const Line = props => {
+
+    const {step} = props
+    const pos = calcPosition(moment(), step)
+    return <LineStyle posY={pos}/>
+}
+
 const Tile = props => {
 
-    const {start, end, interval, size, reduction, bg, width, position} = props
+    const {end, start, bg, width, position, step} = props
 
-    const startOfDay = start.clone().startOf('day')
+    const posY = calcPosition(start, step)
+    const height = calcPosition(start, step, end)
 
-    const diff = (d1, d2) => d2.diff(d1, 'minutes') / interval
-
-    const startDiff = diff(startOfDay, start)
-    const endDiff = diff(start, end)
-
-    const posY = ((startDiff - reduction) * size)
-    const height = (endDiff * size)
-
-    console.log(width * position)
-    return <TileStyle posY={posY} height={height} width={width} bg={bg} posX={width * position}/>
+    return <TileStyle posY={posY}
+                      posX={width * position}
+                      height={height}
+                      width={width}
+                      bg={bg}/>
 
 }
 
@@ -76,7 +92,9 @@ class Schedule extends React.Component {
 
     render() {
 
-        const {data, value, headRender, days: daysCount} = this.props
+        const {data, value: currentValue, headRender, days: daysCount} = this.props
+
+        const value = currentValue || moment()
 
         const days = daysCount ?
             [...new Array(daysCount)].map(() => value) :
@@ -109,6 +127,7 @@ class Schedule extends React.Component {
         let cols = []
         let colHeads = []
 
+        const today = moment()
         const overlapCount = calcOverlaps()
 
         for (let i = 0; i < days.length; i++) {
@@ -117,8 +136,8 @@ class Schedule extends React.Component {
             //todo: imporve performence using group by index
             const todayEvents = data.filter(value => value[0].isSame(day, 'day'))
 
-
             cols.push(<Column>
+                {day.isSame(today, 'day') && <Line step={slotSize / timeSlotInterval}/>}
                 {todayEvents.map(event => {
 
                     const {count, current} = overlapCount(event, todayEvents)
@@ -129,9 +148,7 @@ class Schedule extends React.Component {
                         bg={'blue'}
                         start={event[0]}
                         end={event[1]}
-                        interval={timeSlotInterval}
-                        reduction={timeDisplayInterval / timeSlotInterval}
-                        size={slotSize}>tets</Tile>
+                        step={slotSize / timeSlotInterval}>tets</Tile>
 
 
                 })}

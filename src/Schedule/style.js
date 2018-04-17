@@ -93,7 +93,7 @@ const TimeSlot = (props) => {
 }
 
 const TileStyle = props => {
-    const {posY, height,width, children, bg, posX} = props
+    const {posY, height, width, children, bg, posX} = props
 
     const El = styled.div`
         left: calc(${posX}%);
@@ -107,6 +107,20 @@ const TileStyle = props => {
     return <El>{children}</El>
 }
 
+const LineStyle = props => {
+
+    const El = styled.div`
+      border-top: solid 1px red;
+      left: 0;
+      right: 0;
+      top:${props.posY}px;
+      position: absolute;
+      z-index: 100;
+    `
+
+    return <El />
+}
+
 export {
     TimeColumn,
     Column,
@@ -117,5 +131,6 @@ export {
     Layout,
     Virtual,
     TimeSlot,
-    TileStyle
+    TileStyle,
+    LineStyle
 }

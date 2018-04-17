@@ -67,9 +67,8 @@ const App = () => <Wrapper className="app-wrapper">
     <Content className="content">
         <Schedule
             data={data}
-            mode="day"
-            value={moment().day(3)}
-            // days={3}
+             // value={moment().day(3)}
+             // days={1}
             // headRender={ProviderHeadRender}
         />
     </Content>
