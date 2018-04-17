@@ -1,7 +1,6 @@
 {
-  "name": "react-schedule",
+  "name": "react-event-schedule",
   "version": "0.1.0",
-  "private": true,
   "main":"src/Schedule/index",
   "dependencies": {
     "moment": "^2.22.0",
