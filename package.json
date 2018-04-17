@@ -1,7 +1,8 @@
 {
-  "name": "schedule",
+  "name": "react-schedule",
   "version": "0.1.0",
   "private": true,
+  "main":"src/Schedule/index",
   "dependencies": {
     "moment": "^2.22.0",
     "prop-types": "^15.6.1",

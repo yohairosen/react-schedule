@@ -5,12 +5,12 @@ import styled from 'styled-components'
 import moment from 'moment'
 
 const data = [
-    [moment({hour: 11}), moment({hour: 13, minute:30})],
+    [moment({hour: 11}), moment({hour: 13, minute: 30})],
     [moment({hour: 12}), moment({hour: 13})],
-    [moment({hour: 13, minute:45}), moment({hour: 14, minute:30})],
+    [moment({hour: 13, minute: 45}), moment({hour: 14, minute: 30})],
     [moment({hour: 7}).day(2), moment({hour: 10, minutes: 30}).day(2)],
     [moment({hour: 21}).day(3), moment({hour: 23, minutes: 30}).day(3)],
-    [moment({ hour: 21}).day(0), moment({hour: 23, minutes: 30}).day(0)],
+    [moment({hour: 21}).day(0), moment({hour: 23, minutes: 30}).day(0)],
 ]
 const pData = [
     {name: 'yossi'},
@@ -41,18 +41,6 @@ const Title = styled.h1`
   font-size: 1.5em;
 `
 const Content = styled.div`
-  //overflow: hidden;
-  //position: relative;
-  //height: 100%;
-  //top: 58px;
-  //right: 0;
-  //left: 0;
-  //bottom: 0;
-  //min-height: 100%;
-  //margin-top: 60px;
-      position: relative;
-    height: 100%;
-    min-height: 100%;
 `
 
 const ProviderHeadRender = props => {
@@ -67,8 +55,8 @@ const App = () => <Wrapper className="app-wrapper">
     <Content className="content">
         <Schedule
             data={data}
-             // value={moment().day(3)}
-             // days={1}
+            // value={moment().day(3)}
+            // days={1}
             // headRender={ProviderHeadRender}
         />
     </Content>

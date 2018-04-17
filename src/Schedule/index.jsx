@@ -145,7 +145,7 @@ class Schedule extends React.Component {
                     return <Tile
                         width={100 / count}
                         position={current}
-                        bg={'blue'}
+                        bg={'#b3e5fc'}
                         start={event[0]}
                         end={event[1]}
                         step={slotSize / timeSlotInterval}>tets</Tile>
