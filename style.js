@@ -5,10 +5,41 @@ const TimeColumn = styled.div`
   border-left: solid 1px #e0e0e0;
 `
 
+const HoverStyle = styled.div`
+      height:${props => props.height}px;
+      width:${props => props.width}px;
+      background: pink;
+      left: 0;
+      right: 0;
+      top:0;
+      position: absolute;
+      //z-index: 50000;
+      pointer-events: none;
+      display: none;
+    `
+// const HoverStyle = props => {
+//
+//     const El = styled.div`
+//       height:20px;
+//       background: blue;
+//       left: 0;
+//       right: 0;
+//       top:${props.posY}px;
+//       position: absolute;
+//       z-index: 100;
+//       display: none;
+//     `
+//
+//     return <El/>
+// }
+
 const Column = styled.div`
+  //z-index: 120;
+  //background: red;
   border-left: solid 1px #e0e0e0;
   flex: 1 1 auto;
   position: relative;
+  
 `
 
 const Wrapper = styled.div`
@@ -20,10 +51,19 @@ const Wrapper = styled.div`
     
 `
 
+
+const Main = styled.div`
+  // &:hover ${HoverStyle} {
+  //   display: block;
+  // }
+  height: 100%;
+  position: relative;
+`
+
 const Inner = styled.div`
 
     position: absolute;
-    top: 61px;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -44,6 +84,7 @@ const ColumnHeader = styled.div`
   line-height: 20px;
   max-height: 54px;
   flex: 1 1 auto;
+  pointer-events: none;
 
 
 `
@@ -93,7 +134,7 @@ const TimeSlot = (props) => {
 }
 
 const TileStyle = props => {
-    const {posY, height, width, children, bg, posX} = props
+    const {posY, height, width, children, bg, posX, onClick} = props
 
     const El = styled.div`
         left: calc(${posX}%);
@@ -104,7 +145,7 @@ const TileStyle = props => {
         background: ${bg};
         z-index: 100;
      `
-    return <El>{children}</El>
+    return <El onClick={onClick}>{children}</El>
 }
 
 const LineStyle = props => {
@@ -118,7 +159,7 @@ const LineStyle = props => {
       z-index: 100;
     `
 
-    return <El />
+    return <El/>
 }
 
 export {
@@ -132,5 +173,7 @@ export {
     Virtual,
     TimeSlot,
     TileStyle,
-    LineStyle
+    LineStyle,
+    Main,
+    HoverStyle
 }
